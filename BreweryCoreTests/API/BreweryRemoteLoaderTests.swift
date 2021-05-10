@@ -19,10 +19,10 @@ final class BreweryRemoteLoader {
 }
 
 final class HTTPClientSpy: HTTPClient {
-    private(set) var requestedURL: URL?
+    private(set) var requestedURLs: [URL] = []
 
     func get(from url: URL) {
-        self.requestedURL = url
+        self.requestedURLs.append(url)
     }
 }
 
@@ -30,7 +30,7 @@ final class BreweryRemoteLoaderTests: XCTestCase {
 
     func test_init_shouldNotRequestDataFromURL() {
         let (_, httpClient) = makeSUT()
-        XCTAssertNil(httpClient.requestedURL)
+        XCTAssertEqual(httpClient.requestedURLs, [])
     }
 
     func test_load_requestsDataFromURL() {
@@ -39,7 +39,17 @@ final class BreweryRemoteLoaderTests: XCTestCase {
 
         sut.load()
 
-        XCTAssertEqual(httpClient.requestedURL, url)
+        XCTAssertEqual(httpClient.requestedURLs, [url])
+    }
+
+    func test_loadTwice_requestsTwiceDataFromURL() {
+        let url = URL(string: "https://any-url.com")!
+        let (sut, httpClient) = makeSUT(url: url)
+
+        sut.load()
+        sut.load()
+
+        XCTAssertEqual(httpClient.requestedURLs, [url, url])
     }
 
     private func makeSUT(url: URL = URL(string: "https://given-url.com")!, file: StaticString = #filePath, line: UInt = #line) -> (sut: BreweryRemoteLoader, httpClient: HTTPClientSpy) {
