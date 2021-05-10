@@ -80,42 +80,12 @@ final class BreweryRemoteLoaderTests: XCTestCase {
 
     func test_load_returnsErrorOnClientError() {
         let (sut, httpClient) = makeSUT()
-
-        let exp = expectation(description: "Waiting for load to finish")
-
-        sut.load { result in
-            switch result {
-            case .failure(let error):
-                XCTAssertEqual(error, .clientError)
-            case .success:
-                XCTFail("Got \(result) instead of failure")
-            }
-            exp.fulfill()
-        }
-
-        httpClient.completeWithError(at: 0)
-
-        wait(for: [exp], timeout: 1)
+        assert(sut, toCompleteWithError: .clientError, when: { httpClient.completeWithError(at: 0) })
     }
     
     func test_load_returnsErrorOnInvalidHTTPResponse() {
         let (sut, httpClient) = makeSUT()
-        
-        let exp = expectation(description: "Waiting for load to finish")
-
-        sut.load { result in
-            switch result {
-            case .failure(let error):
-                XCTAssertEqual(error, .invalidData)
-            case .success:
-                XCTFail("Got \(result) instead of failure")
-            }
-            exp.fulfill()
-        }
-
-        httpClient.completeWithInvalidStatusCode(at: 0)
-
-        wait(for: [exp], timeout: 1)
+        assert(sut, toCompleteWithError: .invalidData, when: { httpClient.completeWithInvalidStatusCode(at: 0) })
     }
 
     // MARK: - Test Helpers
@@ -128,5 +98,23 @@ final class BreweryRemoteLoaderTests: XCTestCase {
             XCTAssertNil(sut, "Brewery Remote Loader is not deallocated. Potential memory leak.", file: file, line: line)
         }
         return (sut, httpClient)
+    }
+    
+    private func assert(_ sut: BreweryRemoteLoader, toCompleteWithError expectedError: BreweryRemoteLoader.Error, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
+        let exp = expectation(description: "Waiting for load to finish")
+
+        sut.load { result in
+            switch result {
+            case .failure(let receivedError):
+                XCTAssertEqual(receivedError, expectedError, file: file, line: line)
+            case .success:
+                XCTFail("Got \(result) instead of failure with \(expectedError)", file: file, line: line)
+            }
+            exp.fulfill()
+        }
+
+        action()
+
+        wait(for: [exp], timeout: 1)
     }
 }
