@@ -36,6 +36,11 @@ final class BreweryRemoteLoaderTests: XCTestCase {
         let (sut, httpClient) = makeSUT()
         assert(sut, toCompleteWithError: .invalidData, when: { httpClient.completeWithInvalidStatusCode(at: 0) })
     }
+    
+    func test_load_returnsErrorOnInvalidJSON() {
+        let (sut, httpClient) = makeSUT()
+        assert(sut, toCompleteWithError: .invalidData, when: { httpClient.completeWithInvalidJSON(at: 0) })
+    }
 }
 
 // MARK: - Test Helpers
@@ -69,13 +74,13 @@ private extension BreweryRemoteLoaderTests {
     }
     
     final class HTTPClientSpy: HTTPClient {
-        private var requests = [(url: URL, completion: (Result<HTTPURLResponse, Error>) -> Void)]()
+        private var requests = [(url: URL, completion: (Result<(Data, HTTPURLResponse), Error>) -> Void)]()
 
         var requestedURLs: [URL] {
             requests.map { $0.url }
         }
         
-        func get(from url: URL, completion: @escaping (Result<HTTPURLResponse, Error>) -> Void) {
+        func get(from url: URL, completion: @escaping (Result<(Data, HTTPURLResponse), Error>) -> Void) {
             self.requests.append((url, completion))
         }
 
@@ -85,7 +90,14 @@ private extension BreweryRemoteLoaderTests {
         
         func completeWithInvalidStatusCode(at index: Int) {
             let response = HTTPURLResponse(url: requestedURLs[index], statusCode: 400, httpVersion: nil, headerFields: nil)!
-            requests[index].completion(.success(response))
+            requests[index].completion(.success((Data(), response)))
+        }
+        
+        func completeWithInvalidJSON(at index: Int) {
+            let response = HTTPURLResponse(url: requestedURLs[index], statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let invalidJSON = "invalid_json_all_over_the_place".data(using: .utf8)!
+            
+            requests[index].completion(.success((invalidJSON, response)))
         }
     }
 }

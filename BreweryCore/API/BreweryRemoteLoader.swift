@@ -22,7 +22,6 @@ public final class BreweryRemoteLoader {
             case .success:
                 completion(.failure(.invalidData))
             }
-
         }
     }
 }
