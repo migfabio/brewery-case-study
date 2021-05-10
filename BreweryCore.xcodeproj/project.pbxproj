@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		829822E126493517003DFF86 /* BreweryCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 829822D726493516003DFF86 /* BreweryCore.framework */; };
-		829822E626493517003DFF86 /* BreweryCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829822E526493517003DFF86 /* BreweryCoreTests.swift */; };
-		829822E826493517003DFF86 /* BreweryCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 829822DA26493516003DFF86 /* BreweryCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		829822F226493594003DFF86 /* Brewery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829822F126493594003DFF86 /* Brewery.swift */; };
+		829822F4264935C6003DFF86 /* BreweryLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829822F3264935C6003DFF86 /* BreweryLoader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,11 +24,11 @@
 
 /* Begin PBXFileReference section */
 		829822D726493516003DFF86 /* BreweryCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BreweryCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		829822DA26493516003DFF86 /* BreweryCore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BreweryCore.h; sourceTree = "<group>"; };
 		829822DB26493516003DFF86 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		829822E026493517003DFF86 /* BreweryCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BreweryCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		829822E526493517003DFF86 /* BreweryCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreweryCoreTests.swift; sourceTree = "<group>"; };
 		829822E726493517003DFF86 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		829822F126493594003DFF86 /* Brewery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brewery.swift; sourceTree = "<group>"; };
+		829822F3264935C6003DFF86 /* BreweryLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreweryLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,8 +71,9 @@
 		829822D926493516003DFF86 /* BreweryCore */ = {
 			isa = PBXGroup;
 			children = (
-				829822DA26493516003DFF86 /* BreweryCore.h */,
 				829822DB26493516003DFF86 /* Info.plist */,
+				829822F126493594003DFF86 /* Brewery.swift */,
+				829822F3264935C6003DFF86 /* BreweryLoader.swift */,
 			);
 			path = BreweryCore;
 			sourceTree = "<group>";
@@ -80,7 +81,6 @@
 		829822E426493517003DFF86 /* BreweryCoreTests */ = {
 			isa = PBXGroup;
 			children = (
-				829822E526493517003DFF86 /* BreweryCoreTests.swift */,
 				829822E726493517003DFF86 /* Info.plist */,
 			);
 			path = BreweryCoreTests;
@@ -93,7 +93,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				829822E826493517003DFF86 /* BreweryCore.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -147,6 +146,7 @@
 				TargetAttributes = {
 					829822D626493516003DFF86 = {
 						CreatedOnToolsVersion = 12.5;
+						LastSwiftMigration = 1250;
 					};
 					829822DF26493517003DFF86 = {
 						CreatedOnToolsVersion = 12.5;
@@ -194,6 +194,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				829822F226493594003DFF86 /* Brewery.swift in Sources */,
+				829822F4264935C6003DFF86 /* BreweryLoader.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,7 +203,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				829822E626493517003DFF86 /* BreweryCoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,6 +342,7 @@
 		829822EC26493517003DFF86 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = Q9VK6D84ZR;
@@ -357,6 +359,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.brewery.BreweryCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -365,6 +368,7 @@
 		829822ED26493517003DFF86 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = Q9VK6D84ZR;
@@ -389,6 +393,7 @@
 		829822EF26493517003DFF86 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Q9VK6D84ZR;
 				INFOPLIST_FILE = BreweryCoreTests/Info.plist;
@@ -407,6 +412,7 @@
 		829822F026493517003DFF86 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Q9VK6D84ZR;
 				INFOPLIST_FILE = BreweryCoreTests/Info.plist;
