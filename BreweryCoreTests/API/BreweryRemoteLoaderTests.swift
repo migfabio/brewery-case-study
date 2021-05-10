@@ -1,7 +1,7 @@
 import XCTest
 
 protocol HTTPClient {
-    func get(from url: URL, completion: @escaping (Result<Void, Error>) -> Void)
+    func get(from url: URL, completion: @escaping (Result<HTTPURLResponse, Error>) -> Void)
 }
 
 final class BreweryRemoteLoader {
@@ -10,6 +10,7 @@ final class BreweryRemoteLoader {
 
     enum Error: Swift.Error, Equatable {
         case clientError
+        case invalidData
     }
 
     init(httpClient: HTTPClient, url: URL) {
@@ -18,25 +19,36 @@ final class BreweryRemoteLoader {
     }
 
     func load(completion: @escaping (Result<Void, Error>) -> Void) {
-        httpClient.get(from: url) { _ in
-            completion(.failure(.clientError))
+        httpClient.get(from: url) { result in
+            switch result {
+            case .failure:
+                completion(.failure(.clientError))
+            case .success:
+                completion(.failure(.invalidData))
+            }
+
         }
     }
 }
 
 final class HTTPClientSpy: HTTPClient {
-    private var requests = [(url: URL, completion: (Result<Void, Error>) -> Void)]()
+    private var requests = [(url: URL, completion: (Result<HTTPURLResponse, Error>) -> Void)]()
 
     var requestedURLs: [URL] {
         requests.map { $0.url }
     }
     
-    func get(from url: URL, completion: @escaping (Result<Void, Error>) -> Void) {
+    func get(from url: URL, completion: @escaping (Result<HTTPURLResponse, Error>) -> Void) {
         self.requests.append((url, completion))
     }
 
     func completeWithError(at index: Int) {
         requests[index].completion(.failure(NSError(domain: "", code: 0)))
+    }
+    
+    func completeWithInvalidStatusCode(at index: Int) {
+        let response = HTTPURLResponse(url: requestedURLs[index], statusCode: 400, httpVersion: nil, headerFields: nil)!
+        requests[index].completion(.success(response))
     }
 }
 
@@ -82,6 +94,26 @@ final class BreweryRemoteLoaderTests: XCTestCase {
         }
 
         httpClient.completeWithError(at: 0)
+
+        wait(for: [exp], timeout: 1)
+    }
+    
+    func test_load_returnsErrorOnInvalidHTTPResponse() {
+        let (sut, httpClient) = makeSUT()
+        
+        let exp = expectation(description: "Waiting for load to finish")
+
+        sut.load { result in
+            switch result {
+            case .failure(let error):
+                XCTAssertEqual(error, .invalidData)
+            case .success:
+                XCTFail("Got \(result) instead of failure")
+            }
+            exp.fulfill()
+        }
+
+        httpClient.completeWithInvalidStatusCode(at: 0)
 
         wait(for: [exp], timeout: 1)
     }
