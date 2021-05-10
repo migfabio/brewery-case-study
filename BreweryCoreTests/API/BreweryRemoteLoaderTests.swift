@@ -1,10 +1,14 @@
 import XCTest
 
+protocol HTTPClient {
+    func get(from url: URL)
+}
+
 final class BreweryRemoteLoader {
-    private let httpClient: HTTPClientSpy
+    private let httpClient: HTTPClient
     private let url: URL
 
-    init(httpClient: HTTPClientSpy, url: URL) {
+    init(httpClient: HTTPClient, url: URL) {
         self.httpClient = httpClient
         self.url = url
     }
@@ -14,7 +18,7 @@ final class BreweryRemoteLoader {
     }
 }
 
-final class HTTPClientSpy {
+final class HTTPClientSpy: HTTPClient {
     private(set) var requestedURL: URL?
 
     func get(from url: URL) {
