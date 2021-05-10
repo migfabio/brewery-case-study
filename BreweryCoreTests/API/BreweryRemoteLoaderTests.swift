@@ -1,35 +1,5 @@
+import BreweryCore
 import XCTest
-
-protocol HTTPClient {
-    func get(from url: URL, completion: @escaping (Result<HTTPURLResponse, Error>) -> Void)
-}
-
-final class BreweryRemoteLoader {
-    private let httpClient: HTTPClient
-    private let url: URL
-
-    enum Error: Swift.Error, Equatable {
-        case clientError
-        case invalidData
-    }
-
-    init(httpClient: HTTPClient, url: URL) {
-        self.httpClient = httpClient
-        self.url = url
-    }
-
-    func load(completion: @escaping (Result<Void, Error>) -> Void) {
-        httpClient.get(from: url) { result in
-            switch result {
-            case .failure:
-                completion(.failure(.clientError))
-            case .success:
-                completion(.failure(.invalidData))
-            }
-
-        }
-    }
-}
 
 final class HTTPClientSpy: HTTPClient {
     private var requests = [(url: URL, completion: (Result<HTTPURLResponse, Error>) -> Void)]()
