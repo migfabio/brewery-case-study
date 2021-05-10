@@ -1,6 +1,6 @@
 import Foundation
 
-struct Brewery {
+public struct Brewery: Equatable {
     let name: String
     let street: String
     let city: String

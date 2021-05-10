@@ -41,6 +41,26 @@ final class BreweryRemoteLoaderTests: XCTestCase {
         let (sut, httpClient) = makeSUT()
         assert(sut, toCompleteWithError: .invalidData, when: { httpClient.completeWithInvalidJSON(at: 0) })
     }
+    
+    func test_load_returnsEmptyResultsOnEmptyJSONArray() {
+        let (sut, httpClient) = makeSUT()
+        
+        let exp = expectation(description: "Waiting for load to finish")
+
+        sut.load { result in
+            switch result {
+            case .failure(let receivedError):
+                XCTFail("Got failure of type \(receivedError) instead of success")
+            case .success(let breweries):
+                XCTAssertEqual(breweries, [])
+            }
+            exp.fulfill()
+        }
+        
+        httpClient.completeWithEmptyJSONArray(at: 0)
+
+        wait(for: [exp], timeout: 1)
+    }
 }
 
 // MARK: - Test Helpers
@@ -98,6 +118,12 @@ private extension BreweryRemoteLoaderTests {
             let invalidJSON = "invalid_json_all_over_the_place".data(using: .utf8)!
             
             requests[index].completion(.success((invalidJSON, response)))
+        }
+        
+        func completeWithEmptyJSONArray(at index: Int) {
+            let response = HTTPURLResponse(url: requestedURLs[index], statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let emptyJSONArray = "[]".data(using: .utf8)!
+            requests[index].completion(.success((emptyJSONArray, response)))
         }
     }
 }
