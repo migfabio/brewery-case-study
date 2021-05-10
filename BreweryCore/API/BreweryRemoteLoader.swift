@@ -9,6 +9,17 @@ public final class BreweryRemoteLoader {
         case invalidData
     }
     
+    private struct RemoteBrewery: Decodable {
+        let name: String
+        let street: String?
+        let city: String
+        let state: String
+        
+        func getBrewery() -> Brewery {
+            return Brewery(name: name, street: street, city: city, state: state)
+        }
+    }
+    
     public init(httpClient: HTTPClient, url: URL) {
         self.httpClient = httpClient
         self.url = url
@@ -20,9 +31,9 @@ public final class BreweryRemoteLoader {
             case .failure:
                 completion(.failure(.clientError))
             case .success(let (data, response)):
-                if let _ = try? JSONSerialization.jsonObject(with: data),
+                if let breweries = try? JSONDecoder().decode([RemoteBrewery].self, from: data),
                    response.statusCode == 200 {
-                    completion(.success([]))
+                    completion(.success(breweries.map { $0.getBrewery() }))
                 } else {
                     completion(.failure(.invalidData))
                 }
