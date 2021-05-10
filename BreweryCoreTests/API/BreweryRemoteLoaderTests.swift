@@ -1,27 +1,6 @@
 import BreweryCore
 import XCTest
 
-final class HTTPClientSpy: HTTPClient {
-    private var requests = [(url: URL, completion: (Result<HTTPURLResponse, Error>) -> Void)]()
-
-    var requestedURLs: [URL] {
-        requests.map { $0.url }
-    }
-    
-    func get(from url: URL, completion: @escaping (Result<HTTPURLResponse, Error>) -> Void) {
-        self.requests.append((url, completion))
-    }
-
-    func completeWithError(at index: Int) {
-        requests[index].completion(.failure(NSError(domain: "", code: 0)))
-    }
-    
-    func completeWithInvalidStatusCode(at index: Int) {
-        let response = HTTPURLResponse(url: requestedURLs[index], statusCode: 400, httpVersion: nil, headerFields: nil)!
-        requests[index].completion(.success(response))
-    }
-}
-
 final class BreweryRemoteLoaderTests: XCTestCase {
 
     func test_init_shouldNotRequestDataFromURL() {
@@ -57,10 +36,11 @@ final class BreweryRemoteLoaderTests: XCTestCase {
         let (sut, httpClient) = makeSUT()
         assert(sut, toCompleteWithError: .invalidData, when: { httpClient.completeWithInvalidStatusCode(at: 0) })
     }
+}
 
-    // MARK: - Test Helpers
-
-    private func makeSUT(url: URL = URL(string: "https://given-url.com")!, file: StaticString = #filePath, line: UInt = #line) -> (sut: BreweryRemoteLoader, httpClient: HTTPClientSpy) {
+// MARK: - Test Helpers
+private extension BreweryRemoteLoaderTests {
+    func makeSUT(url: URL = URL(string: "https://given-url.com")!, file: StaticString = #filePath, line: UInt = #line) -> (sut: BreweryRemoteLoader, httpClient: HTTPClientSpy) {
         let httpClient = HTTPClientSpy()
         let sut = BreweryRemoteLoader(httpClient: httpClient, url: url)
         addTeardownBlock { [weak httpClient, weak sut] in
@@ -70,7 +50,7 @@ final class BreweryRemoteLoaderTests: XCTestCase {
         return (sut, httpClient)
     }
     
-    private func assert(_ sut: BreweryRemoteLoader, toCompleteWithError expectedError: BreweryRemoteLoader.Error, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
+    func assert(_ sut: BreweryRemoteLoader, toCompleteWithError expectedError: BreweryRemoteLoader.Error, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
         let exp = expectation(description: "Waiting for load to finish")
 
         sut.load { result in
@@ -86,5 +66,26 @@ final class BreweryRemoteLoaderTests: XCTestCase {
         action()
 
         wait(for: [exp], timeout: 1)
+    }
+    
+    final class HTTPClientSpy: HTTPClient {
+        private var requests = [(url: URL, completion: (Result<HTTPURLResponse, Error>) -> Void)]()
+
+        var requestedURLs: [URL] {
+            requests.map { $0.url }
+        }
+        
+        func get(from url: URL, completion: @escaping (Result<HTTPURLResponse, Error>) -> Void) {
+            self.requests.append((url, completion))
+        }
+
+        func completeWithError(at index: Int) {
+            requests[index].completion(.failure(NSError(domain: "", code: 0)))
+        }
+        
+        func completeWithInvalidStatusCode(at index: Int) {
+            let response = HTTPURLResponse(url: requestedURLs[index], statusCode: 400, httpVersion: nil, headerFields: nil)!
+            requests[index].completion(.success(response))
+        }
     }
 }
