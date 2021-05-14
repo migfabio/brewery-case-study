@@ -1,5 +1,5 @@
 import Foundation
 
 protocol BreweryLoader {
-    func getBreweries(for state: String, completion: Result<[Brewery], Error>)
+    func load(for state: String, completion: @escaping (Result<[Brewery], Error>) -> Void)
 }
