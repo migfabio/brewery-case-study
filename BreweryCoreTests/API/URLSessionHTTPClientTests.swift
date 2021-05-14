@@ -55,8 +55,6 @@ final class URLSessionHTTPClientTests: XCTestCase {
     func test_get_performsGETRequestWithURL() {
         let url = anyURL()
 
-        let sut = URLSessionHTTPClient()
-
         let exp = expectation(description: "Waiting for result")
 
         URLProtocolStub.spyRequest = { request in
@@ -65,13 +63,21 @@ final class URLSessionHTTPClientTests: XCTestCase {
             exp.fulfill()
         }
 
-        sut.get(from: url) { _ in }
+        makeSUT().get(from: url) { _ in }
 
         wait(for: [exp], timeout: 1.0)
     }
 }
 
 private extension URLSessionHTTPClientTests {
+    func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> HTTPClient {
+        let httpClient = URLSessionHTTPClient()
+        addTeardownBlock { [weak httpClient] in
+            XCTAssertNil(httpClient, "HTTP Client is not deallocated. Potential memory leak.", file: file, line: line)
+        }
+        return httpClient
+    }
+
     func anyURL() -> URL {
         return URL(string: "https://any-url.com")!
     }
@@ -99,12 +105,10 @@ private extension URLSessionHTTPClientTests {
         URLProtocolStub.response = response
         URLProtocolStub.error = error
         
-        let sut = URLSessionHTTPClient()
-
         let exp = expectation(description: "Waiting for completion")
 
         var receivedResult: Result<(Data, HTTPURLResponse), Error>!
-        sut.get(from: url) { result in
+        makeSUT().get(from: url) { result in
             receivedResult = result
             exp.fulfill()
         }
