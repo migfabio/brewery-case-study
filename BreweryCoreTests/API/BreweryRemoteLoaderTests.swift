@@ -29,17 +29,24 @@ final class BreweryRemoteLoaderTests: XCTestCase {
 
     func test_load_returnsErrorOnClientError() {
         let (sut, httpClient) = makeSUT()
-        assert(sut, toCompleteWithError: .clientError, when: { httpClient.completeWithError(at: 0) })
+        assert(sut, toCompleteWithError: .clientError, when: {
+            httpClient.completeWithError(at: 0)
+        })
     }
     
     func test_load_returnsErrorOnInvalidHTTPResponse() {
         let (sut, httpClient) = makeSUT()
-        assert(sut, toCompleteWithError: .invalidData, when: { httpClient.completeWithInvalidStatusCode(at: 0) })
+        assert(sut, toCompleteWithError: .invalidData, when: {
+            httpClient.complete(withStatusCode: 400, data: Data(), at: 0)
+        })
     }
     
     func test_load_returnsErrorOnInvalidJSON() {
         let (sut, httpClient) = makeSUT()
-        assert(sut, toCompleteWithError: .invalidData, when: { httpClient.completeWithInvalidJSON(at: 0) })
+        let invalidData = "invalid_json".data(using: .utf8)!
+        assert(sut, toCompleteWithError: .invalidData, when: {
+            httpClient.complete(withStatusCode: 200, data: invalidData, at: 0)
+        })
     }
     
     func test_load_returnsEmptyResultsOnEmptyJSONArray() {
@@ -56,8 +63,9 @@ final class BreweryRemoteLoaderTests: XCTestCase {
             }
             exp.fulfill()
         }
-        
-        httpClient.completeWithEmptyJSONArray(at: 0)
+
+        let emptyJSON = "[]".data(using: .utf8)!
+        httpClient.complete(withStatusCode: 200, data: emptyJSON, at: 0)
 
         wait(for: [exp], timeout: 1)
     }
@@ -80,7 +88,7 @@ final class BreweryRemoteLoaderTests: XCTestCase {
             exp.fulfill()
         }
         
-        httpClient.completeWithValidJSON(at: 0)
+        httpClient.complete(withStatusCode: 200, data: makeJSONResponse(), at: 0)
 
         wait(for: [exp], timeout: 1)
     }
@@ -115,6 +123,53 @@ private extension BreweryRemoteLoaderTests {
 
         wait(for: [exp], timeout: 1)
     }
+
+    func makeJSONResponse() -> Data {
+        """
+            [
+                {
+                    "id": 9094,
+                    "obdb_id": "bnaf-llc-austin",
+                    "name": "Bnaf, LLC",
+                    "brewery_type": "planning",
+                    "street": null,
+                    "address_2": null,
+                    "address_3": null,
+                    "city": "Austin",
+                    "state": "Texas",
+                    "county_province": null,
+                    "postal_code": "78727-7602",
+                    "country": "United States",
+                    "longitude": null,
+                    "latitude": null,
+                    "phone": null,
+                    "website_url": null,
+                    "updated_at": "2018-07-24T00:00:00.000Z",
+                    "created_at": "2018-07-24T00:00:00.000Z"
+                },
+                {
+                    "id": 9180,
+                    "obdb_id": "boulder-beer-co-boulder",
+                    "name": "Boulder Beer Co",
+                    "brewery_type": "regional",
+                    "street": "2880 Wilderness Pl",
+                    "address_2": null,
+                    "address_3": null,
+                    "city": "Boulder",
+                    "state": "Colorado",
+                    "county_province": null,
+                    "postal_code": "80301-5401",
+                    "country": "United States",
+                    "longitude": "-105.2480158",
+                    "latitude": "40.026439",
+                    "phone": null,
+                    "website_url": null,
+                    "updated_at": "2018-08-24T00:00:00.000Z",
+                    "created_at": "2018-07-24T00:00:00.000Z"
+                }
+            ]
+        """.data(using: .utf8)!
+    }
     
     final class HTTPClientSpy: HTTPClient {
         private var requests = [(url: URL, completion: (Result<(Data, HTTPURLResponse), Error>) -> Void)]()
@@ -130,72 +185,15 @@ private extension BreweryRemoteLoaderTests {
         func completeWithError(at index: Int) {
             requests[index].completion(.failure(NSError(domain: "", code: 0)))
         }
-        
-        func completeWithInvalidStatusCode(at index: Int) {
-            let response = HTTPURLResponse(url: requestedURLs[index], statusCode: 400, httpVersion: nil, headerFields: nil)!
-            requests[index].completion(.success((Data(), response)))
-        }
-        
-        func completeWithInvalidJSON(at index: Int) {
-            let response = HTTPURLResponse(url: requestedURLs[index], statusCode: 200, httpVersion: nil, headerFields: nil)!
-            let invalidJSON = "invalid_json_all_over_the_place".data(using: .utf8)!
-            
-            requests[index].completion(.success((invalidJSON, response)))
-        }
-        
-        func completeWithEmptyJSONArray(at index: Int) {
-            let response = HTTPURLResponse(url: requestedURLs[index], statusCode: 200, httpVersion: nil, headerFields: nil)!
-            let emptyJSONArray = "[]".data(using: .utf8)!
-            requests[index].completion(.success((emptyJSONArray, response)))
-        }
-        
-        func completeWithValidJSON(at index: Int) {
-            let response = HTTPURLResponse(url: requestedURLs[index], statusCode: 200, httpVersion: nil, headerFields: nil)!
-            let emptyJSONArray = """
-                [
-                    {
-                        "id": 9094,
-                        "obdb_id": "bnaf-llc-austin",
-                        "name": "Bnaf, LLC",
-                        "brewery_type": "planning",
-                        "street": null,
-                        "address_2": null,
-                        "address_3": null,
-                        "city": "Austin",
-                        "state": "Texas",
-                        "county_province": null,
-                        "postal_code": "78727-7602",
-                        "country": "United States",
-                        "longitude": null,
-                        "latitude": null,
-                        "phone": null,
-                        "website_url": null,
-                        "updated_at": "2018-07-24T00:00:00.000Z",
-                        "created_at": "2018-07-24T00:00:00.000Z"
-                    },
-                    {
-                        "id": 9180,
-                        "obdb_id": "boulder-beer-co-boulder",
-                        "name": "Boulder Beer Co",
-                        "brewery_type": "regional",
-                        "street": "2880 Wilderness Pl",
-                        "address_2": null,
-                        "address_3": null,
-                        "city": "Boulder",
-                        "state": "Colorado",
-                        "county_province": null,
-                        "postal_code": "80301-5401",
-                        "country": "United States",
-                        "longitude": "-105.2480158",
-                        "latitude": "40.026439",
-                        "phone": null,
-                        "website_url": null,
-                        "updated_at": "2018-08-24T00:00:00.000Z",
-                        "created_at": "2018-07-24T00:00:00.000Z"
-                    }
-                ]
-            """.data(using: .utf8)!
-            requests[index].completion(.success((emptyJSONArray, response)))
+
+        func complete(withStatusCode code: Int, data: Data, at index: Int) {
+            let response = HTTPURLResponse(
+                url: requestedURLs[index],
+                statusCode: code,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            requests[index].completion(.success((data, response)))
         }
     }
 }
