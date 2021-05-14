@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8292D15D264EBC360000A310 /* XCTestCase+MemoryLeakTracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8292D15C264EBC360000A310 /* XCTestCase+MemoryLeakTracking.swift */; };
 		829822E126493517003DFF86 /* BreweryCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 829822D726493516003DFF86 /* BreweryCore.framework */; };
 		829822F226493594003DFF86 /* Brewery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829822F126493594003DFF86 /* Brewery.swift */; };
 		829822F4264935C6003DFF86 /* BreweryLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829822F3264935C6003DFF86 /* BreweryLoader.swift */; };
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8292D15C264EBC360000A310 /* XCTestCase+MemoryLeakTracking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+MemoryLeakTracking.swift"; sourceTree = "<group>"; };
 		829822D726493516003DFF86 /* BreweryCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BreweryCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		829822DB26493516003DFF86 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		829822E026493517003DFF86 /* BreweryCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BreweryCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -60,6 +62,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8292D15B264EBC1F0000A310 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				8292D15C264EBC360000A310 /* XCTestCase+MemoryLeakTracking.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 		829822CD26493516003DFF86 = {
 			isa = PBXGroup;
 			children = (
@@ -111,6 +121,7 @@
 		829822F626493631003DFF86 /* API */ = {
 			isa = PBXGroup;
 			children = (
+				8292D15B264EBC1F0000A310 /* Helpers */,
 				829822F726493659003DFF86 /* BreweryRemoteLoaderTests.swift */,
 				82A26297264E78EE008ED27A /* URLSessionHTTPClientTests.swift */,
 			);
@@ -240,6 +251,7 @@
 			files = (
 				829822F826493659003DFF86 /* BreweryRemoteLoaderTests.swift in Sources */,
 				82A26298264E78EE008ED27A /* URLSessionHTTPClientTests.swift in Sources */,
+				8292D15D264EBC360000A310 /* XCTestCase+MemoryLeakTracking.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

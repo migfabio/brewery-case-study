@@ -72,9 +72,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
 private extension URLSessionHTTPClientTests {
     func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> HTTPClient {
         let httpClient = URLSessionHTTPClient()
-        addTeardownBlock { [weak httpClient] in
-            XCTAssertNil(httpClient, "HTTP Client is not deallocated. Potential memory leak.", file: file, line: line)
-        }
+        trackForMemoryLeak(httpClient, file: file, line: line)
         return httpClient
     }
 
