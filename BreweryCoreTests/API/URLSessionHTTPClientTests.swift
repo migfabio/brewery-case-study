@@ -66,6 +66,16 @@ final class URLSessionHTTPClientTests: XCTestCase {
         XCTAssertEqual(receivedValues?.response.statusCode, expectedResponse.statusCode)
         XCTAssertEqual(receivedValues?.response.url, expectedResponse.url)
     }
+    
+    func test_get_succeedsOnRequestSuccessWithData() {
+        let expectedResponse = anyHTTPURLResponse()
+        let expectedData = anyData()
+        let receivedValues = resultValuesFor(data: expectedData, response: expectedResponse, error: nil)
+        
+        XCTAssertEqual(receivedValues?.data, expectedData)
+        XCTAssertEqual(receivedValues?.response.statusCode, expectedResponse.statusCode)
+        XCTAssertEqual(receivedValues?.response.url, expectedResponse.url)
+    }
 }
 
 private extension URLSessionHTTPClientTests {
