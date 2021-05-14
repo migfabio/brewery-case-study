@@ -51,6 +51,24 @@ final class URLSessionHTTPClientTests: XCTestCase {
         XCTAssertEqual(receivedValues?.response.statusCode, expectedResponse.statusCode)
         XCTAssertEqual(receivedValues?.response.url, expectedResponse.url)
     }
+
+    func test_get_performsGETRequestWithURL() {
+        let url = anyURL()
+
+        let sut = URLSessionHTTPClient()
+
+        let exp = expectation(description: "Waiting for result")
+
+        URLProtocolStub.spyRequest = { request in
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.url, url)
+            exp.fulfill()
+        }
+
+        sut.get(from: url) { _ in }
+
+        wait(for: [exp], timeout: 1.0)
+    }
 }
 
 private extension URLSessionHTTPClientTests {
@@ -123,6 +141,8 @@ private extension URLSessionHTTPClientTests {
         static var data: Data?
         static var response: URLResponse?
         static var error: Error?
+
+        static var spyRequest: ((URLRequest) -> Void)?
         
         static func register() {
             URLProtocol.registerClass(URLProtocolStub.self)
@@ -133,6 +153,7 @@ private extension URLSessionHTTPClientTests {
             URLProtocolStub.data = nil
             URLProtocolStub.response = nil
             URLProtocolStub.error = nil
+            URLProtocolStub.spyRequest = nil
         }
 
         override class func canInit(with request: URLRequest) -> Bool {
@@ -144,6 +165,12 @@ private extension URLSessionHTTPClientTests {
         }
 
         override func startLoading() {
+            if let spyRequest = URLProtocolStub.spyRequest {
+                client?.urlProtocolDidFinishLoading(self)
+                spyRequest(request)
+                return
+            }
+
             if let data = URLProtocolStub.data {
                 client?.urlProtocol(self, didLoad: data)
             }
