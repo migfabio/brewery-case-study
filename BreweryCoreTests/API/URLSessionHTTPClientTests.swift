@@ -36,7 +36,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
     }
     
     func test_get_failsOnRequestError() {
-        let expectedError = NSError(domain: "", code: 0)
+        let expectedError = anyError()
         let receivedError = errorFor(data: nil, response: nil, error: expectedError) as NSError?
         
         XCTAssertEqual(receivedError?.domain, expectedError.domain)
@@ -45,12 +45,40 @@ final class URLSessionHTTPClientTests: XCTestCase {
     
     func test_get_failsOnInvalidStates() {
         XCTAssertNotNil(errorFor(data: nil, response: nil, error: nil))
+        XCTAssertNotNil(errorFor(data: nil, response: anyNonHTTPURLResponse(), error: nil))
+        XCTAssertNotNil(errorFor(data: anyData(), response: nil, error: nil))
+        XCTAssertNotNil(errorFor(data: anyData(), response: nil, error: anyError()))
+        XCTAssertNotNil(errorFor(data: nil, response: anyNonHTTPURLResponse(), error: anyError()))
+        XCTAssertNotNil(errorFor(data: nil, response: anyHTTPURLResponse(), error: anyError()))
+        XCTAssertNotNil(errorFor(data: anyData(), response: anyHTTPURLResponse(), error: anyError()))
+        XCTAssertNotNil(errorFor(data: anyData(), response: anyNonHTTPURLResponse(), error: anyError()))
+        XCTAssertNotNil(errorFor(data: anyData(), response: anyNonHTTPURLResponse(), error: nil))
     }
 }
 
 private extension URLSessionHTTPClientTests {
+    func anyURL() -> URL {
+        return URL(string: "https://any-url.com")!
+    }
+    
+    func anyNonHTTPURLResponse() -> URLResponse {
+        return URLResponse(url: anyURL(), mimeType: nil, expectedContentLength: 0, textEncodingName: nil)
+    }
+    
+    func anyHTTPURLResponse() -> HTTPURLResponse {
+        return HTTPURLResponse(url: anyURL(), statusCode: 200, httpVersion: nil, headerFields: nil)!
+    }
+    
+    func anyData() -> Data {
+        return "some_data".data(using: .utf8)!
+    }
+    
+    func anyError() -> NSError {
+        return NSError(domain: "", code: 0)
+    }
+    
     func resultFor(data: Data?, response: URLResponse?, error: Error?, file: StaticString = #filePath, line: UInt = #line) -> Result<(Data, HTTPURLResponse), Error> {
-        let url = URL(string: "https://any-url.com")!
+        let url = anyURL()
         
         URLProtocolStub.data = data
         URLProtocolStub.response = response
