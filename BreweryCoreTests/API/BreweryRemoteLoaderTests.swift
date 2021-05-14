@@ -29,68 +29,42 @@ final class BreweryRemoteLoaderTests: XCTestCase {
 
     func test_load_returnsErrorOnClientError() {
         let (sut, httpClient) = makeSUT()
-        assert(sut, toCompleteWithError: .clientError, when: {
+
+        assert(sut, toCompleteWithResult: .failure(.clientError), when: {
             httpClient.completeWithError(at: 0)
         })
     }
     
     func test_load_returnsErrorOnInvalidHTTPResponse() {
         let (sut, httpClient) = makeSUT()
-        assert(sut, toCompleteWithError: .invalidData, when: {
+
+        assert(sut, toCompleteWithResult: .failure(.invalidData), when: {
             httpClient.complete(withStatusCode: 400, data: Data(), at: 0)
         })
     }
     
     func test_load_returnsErrorOnInvalidJSON() {
         let (sut, httpClient) = makeSUT()
-        let invalidData = "invalid_json".data(using: .utf8)!
-        assert(sut, toCompleteWithError: .invalidData, when: {
-            httpClient.complete(withStatusCode: 200, data: invalidData, at: 0)
+
+        assert(sut, toCompleteWithResult: .failure(.invalidData), when: {
+            httpClient.complete(withStatusCode: 200, data: makeInvalidJSON(), at: 0)
         })
     }
     
     func test_load_returnsEmptyResultsOnEmptyJSONArray() {
         let (sut, httpClient) = makeSUT()
-        
-        let exp = expectation(description: "Waiting for load to finish")
 
-        sut.load { result in
-            switch result {
-            case .failure(let receivedError):
-                XCTFail("Got failure of type \(receivedError) instead of success")
-            case .success(let breweries):
-                XCTAssertEqual(breweries, [])
-            }
-            exp.fulfill()
-        }
-
-        let emptyJSON = "[]".data(using: .utf8)!
-        httpClient.complete(withStatusCode: 200, data: emptyJSON, at: 0)
-
-        wait(for: [exp], timeout: 1)
+        assert(sut, toCompleteWithResult: .success([]), when: {
+            httpClient.complete(withStatusCode: 200, data: makeEmptyJSON(), at: 0)
+        })
     }
     
     func test_load_returnsBreweriesOnValidJSON() {
         let (sut, httpClient) = makeSUT()
-        
-        let exp = expectation(description: "Waiting for load to finish")
 
-        sut.load { result in
-            switch result {
-            case .failure(let receivedError):
-                XCTFail("Got failure of type \(receivedError) instead of success")
-            case .success(let breweries):
-                XCTAssertEqual(breweries, [
-                                Brewery(name: "Bnaf, LLC", street: nil, city: "Austin", state: "Texas"),
-                                Brewery(name: "Boulder Beer Co", street: "2880 Wilderness Pl", city: "Boulder", state: "Colorado")
-                ])
-            }
-            exp.fulfill()
-        }
-        
-        httpClient.complete(withStatusCode: 200, data: makeJSONResponse(), at: 0)
-
-        wait(for: [exp], timeout: 1)
+        assert(sut, toCompleteWithResult: .success(makeBreweries()), when: {
+            httpClient.complete(withStatusCode: 200, data: makeValidJSON(), at: 0)
+        })
     }
 }
 
@@ -106,15 +80,17 @@ private extension BreweryRemoteLoaderTests {
         return (sut, httpClient)
     }
     
-    func assert(_ sut: BreweryRemoteLoader, toCompleteWithError expectedError: BreweryRemoteLoader.Error, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
+    func assert(_ sut: BreweryRemoteLoader, toCompleteWithResult expectedResult: BreweryRemoteLoader.Result, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
         let exp = expectation(description: "Waiting for load to finish")
 
-        sut.load { result in
-            switch result {
-            case .failure(let receivedError):
+        sut.load { receivedResult in
+            switch (receivedResult, expectedResult) {
+            case let (.success(receivedBreweries), .success(expectedBreweries)):
+                XCTAssertEqual(receivedBreweries, expectedBreweries, file: file, line: line)
+            case let (.failure(receivedError), .failure(expectedError)):
                 XCTAssertEqual(receivedError, expectedError, file: file, line: line)
-            case .success:
-                XCTFail("Got \(result) instead of failure with \(expectedError)", file: file, line: line)
+            default:
+                XCTFail("Expected result \(expectedResult), got \(receivedResult) instead", file: file, line: line)
             }
             exp.fulfill()
         }
@@ -124,7 +100,15 @@ private extension BreweryRemoteLoaderTests {
         wait(for: [exp], timeout: 1)
     }
 
-    func makeJSONResponse() -> Data {
+    func makeInvalidJSON() -> Data {
+        "invalid_json".data(using: .utf8)!
+    }
+
+    func makeEmptyJSON() -> Data {
+        "[]".data(using: .utf8)!
+    }
+
+    func makeValidJSON() -> Data {
         """
             [
                 {
@@ -169,6 +153,13 @@ private extension BreweryRemoteLoaderTests {
                 }
             ]
         """.data(using: .utf8)!
+    }
+
+    func makeBreweries() -> [Brewery] {
+        [
+            Brewery(name: "Bnaf, LLC", street: nil, city: "Austin", state: "Texas"),
+            Brewery(name: "Boulder Beer Co", street: "2880 Wilderness Pl", city: "Boulder", state: "Colorado")
+        ]
     }
     
     final class HTTPClientSpy: HTTPClient {

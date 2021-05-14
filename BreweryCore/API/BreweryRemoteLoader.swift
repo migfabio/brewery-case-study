@@ -3,6 +3,8 @@ import Foundation
 public final class BreweryRemoteLoader {
     private let httpClient: HTTPClient
     private let url: URL
+
+    public typealias Result = Swift.Result<[Brewery], Error>
     
     public enum Error: Swift.Error, Equatable {
         case clientError
@@ -25,7 +27,7 @@ public final class BreweryRemoteLoader {
         self.url = url
     }
     
-    public func load(completion: @escaping (Result<[Brewery], Error>) -> Void) {
+    public func load(completion: @escaping (Result) -> Void) {
         httpClient.get(from: url) { result in
             switch result {
             case .failure:
