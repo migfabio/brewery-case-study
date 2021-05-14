@@ -12,7 +12,7 @@ final class BreweryRemoteLoaderTests: XCTestCase {
         let url = URL(string: "https://any-url.com")!
         let (sut, httpClient) = makeSUT(url: url)
 
-        sut.load(for: "") { _ in }
+        sut.load { _ in }
 
         XCTAssertEqual(httpClient.requestedURLs, [url])
     }
@@ -21,8 +21,8 @@ final class BreweryRemoteLoaderTests: XCTestCase {
         let url = URL(string: "https://any-url.com")!
         let (sut, httpClient) = makeSUT(url: url)
 
-        sut.load(for: "") { _ in }
-        sut.load(for: "") { _ in }
+        sut.load { _ in }
+        sut.load { _ in }
 
         XCTAssertEqual(httpClient.requestedURLs, [url, url])
     }
@@ -85,7 +85,7 @@ private extension BreweryRemoteLoaderTests {
     func assert(_ sut: BreweryRemoteLoader, toCompleteWithResult expectedResult: BreweryRemoteLoader.Result, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
         let exp = expectation(description: "Waiting for load to finish")
 
-        sut.load(for: "") { receivedResult in
+        sut.load { receivedResult in
             switch (receivedResult, expectedResult) {
             case let (.success(receivedBreweries), .success(expectedBreweries)):
                 XCTAssertEqual(receivedBreweries, expectedBreweries, file: file, line: line)

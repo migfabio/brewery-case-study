@@ -27,7 +27,7 @@ public final class BreweryRemoteLoader: BreweryLoader {
         self.url = url
     }
     
-    public func load(for state: String, completion: @escaping (Result) -> Void) {
+    public func load(completion: @escaping (Result) -> Void) {
         httpClient.get(from: url) { result in
             switch result {
             case .failure:
