@@ -11,9 +11,11 @@ class URLSessionHTTPClient: HTTPClient {
     }
 
     func get(from url: URL, completion: @escaping (Result<(Data, HTTPURLResponse), Error>) -> Void) {
-        session.dataTask(with: url) { _, _, error in
+        session.dataTask(with: url) { data, response, error in
             if let error = error {
                 completion(.failure(error))
+            } else if let data = data, let response = response as? HTTPURLResponse {
+                completion(.success((data, response)))
             } else {
                 completion(.failure(InvalidRepresentation()))
             }
@@ -53,6 +55,16 @@ final class URLSessionHTTPClientTests: XCTestCase {
         XCTAssertNotNil(errorFor(data: anyData(), response: anyHTTPURLResponse(), error: anyError()))
         XCTAssertNotNil(errorFor(data: anyData(), response: anyNonHTTPURLResponse(), error: anyError()))
         XCTAssertNotNil(errorFor(data: anyData(), response: anyNonHTTPURLResponse(), error: nil))
+    }
+    
+    func test_get_succeedsOnRequestSuccessWithoutData() {
+        let expectedResponse = anyHTTPURLResponse()
+        let receivedValues = resultValuesFor(data: nil, response: expectedResponse, error: nil)
+        let emptyData = Data()
+        
+        XCTAssertEqual(receivedValues?.data, emptyData)
+        XCTAssertEqual(receivedValues?.response.statusCode, expectedResponse.statusCode)
+        XCTAssertEqual(receivedValues?.response.url, expectedResponse.url)
     }
 }
 
@@ -106,6 +118,18 @@ private extension URLSessionHTTPClientTests {
             return error
         default:
             XCTFail("Expected failure, received \(result) instead", file: file, line: line)
+            return nil
+        }
+    }
+    
+    func resultValuesFor(data: Data?, response: URLResponse?, error: Error?, file: StaticString = #filePath, line: UInt = #line) -> (data: Data, response: HTTPURLResponse)? {
+        let result = resultFor(data: data, response: response, error: error, file: file, line: line)
+        
+        switch result {
+        case let .success(values):
+            return values
+        default:
+            XCTFail("Expected success, received \(result) instead", file: file, line: line)
             return nil
         }
     }
