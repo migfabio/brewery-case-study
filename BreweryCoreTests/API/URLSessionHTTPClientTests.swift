@@ -26,15 +26,12 @@ class URLSessionHTTPClient: HTTPClient {
 final class URLSessionHTTPClientTests: XCTestCase {
     override func setUp() {
         super.setUp()
-        URLProtocol.registerClass(URLProtocolStub.self)
+        URLProtocolStub.register()
     }
     
     override func tearDown() {
         super.tearDown()
-        URLProtocol.unregisterClass(URLProtocolStub.self)
-        URLProtocolStub.data = nil
-        URLProtocolStub.response = nil
-        URLProtocolStub.error = nil
+        URLProtocolStub.unregister()
     }
     
     func test_get_failsOnRequestError() {
@@ -148,6 +145,17 @@ private extension URLSessionHTTPClientTests {
         static var data: Data?
         static var response: URLResponse?
         static var error: Error?
+        
+        static func register() {
+            URLProtocol.registerClass(URLProtocolStub.self)
+        }
+        
+        static func unregister() {
+            URLProtocol.unregisterClass(URLProtocolStub.self)
+            URLProtocolStub.data = nil
+            URLProtocolStub.response = nil
+            URLProtocolStub.error = nil
+        }
 
         override class func canInit(with request: URLRequest) -> Bool {
             return true
