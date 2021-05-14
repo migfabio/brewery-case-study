@@ -11,6 +11,7 @@
 		829822F226493594003DFF86 /* Brewery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829822F126493594003DFF86 /* Brewery.swift */; };
 		829822F4264935C6003DFF86 /* BreweryLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829822F3264935C6003DFF86 /* BreweryLoader.swift */; };
 		829822F826493659003DFF86 /* BreweryRemoteLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829822F726493659003DFF86 /* BreweryRemoteLoaderTests.swift */; };
+		82A26298264E78EE008ED27A /* URLSessionHTTPClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A26297264E78EE008ED27A /* URLSessionHTTPClientTests.swift */; };
 		9E4C7B592649861100271553 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4C7B582649861100271553 /* HTTPClient.swift */; };
 		9E4C7B5D2649864E00271553 /* BreweryRemoteLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4C7B5C2649864E00271553 /* BreweryRemoteLoader.swift */; };
 /* End PBXBuildFile section */
@@ -33,6 +34,7 @@
 		829822F126493594003DFF86 /* Brewery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brewery.swift; sourceTree = "<group>"; };
 		829822F3264935C6003DFF86 /* BreweryLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreweryLoader.swift; sourceTree = "<group>"; };
 		829822F726493659003DFF86 /* BreweryRemoteLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreweryRemoteLoaderTests.swift; sourceTree = "<group>"; };
+		82A26297264E78EE008ED27A /* URLSessionHTTPClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionHTTPClientTests.swift; sourceTree = "<group>"; };
 		9E4C7B582649861100271553 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
 		9E4C7B5C2649864E00271553 /* BreweryRemoteLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreweryRemoteLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -107,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				829822F726493659003DFF86 /* BreweryRemoteLoaderTests.swift */,
+				82A26297264E78EE008ED27A /* URLSessionHTTPClientTests.swift */,
 			);
 			path = API;
 			sourceTree = "<group>";
@@ -232,6 +235,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				829822F826493659003DFF86 /* BreweryRemoteLoaderTests.swift in Sources */,
+				82A26298264E78EE008ED27A /* URLSessionHTTPClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
